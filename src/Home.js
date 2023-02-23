@@ -2,9 +2,9 @@ import { View, Text, Button, StyleSheet } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
+import { collection, query, orderBy, getDocs } from "firebase/firestore";
 
 import db from '../config/config'
-import { collection, getDocs  } from "firebase/firestore";
 
 const Home = () => {
 
@@ -12,11 +12,14 @@ const Home = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
+
     async function getNotes(db) {
-      const notas = collection(db, 'notes');
-      const citySnapshot = await getDocs(notas);
-      const notasList = citySnapshot.docs.map(doc => doc.data());
-      setNotes(notasList);
+      const q = query(collection(db, "notes"), orderBy('title', 'asc'));
+      const querySnapshot = await getDocs(q);
+      querySnapshot.forEach((doc) => {
+        const notasList = querySnapshot.docs.map(doc => doc.data());
+        setNotes(notasList);
+      });
     }
     getNotes(db);
   }, []);
