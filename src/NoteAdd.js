@@ -1,10 +1,12 @@
-import { View, Text, Keyboard, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import React, {useState} from 'react';
+import { useNavigation } from '@react-navigation/native'
 import db from '../config/config';
 import { collection, addDoc } from "firebase/firestore"; 
 
-const NoteAdd = () => {
+const NoteAdd = ({route}) => {
 
+  const navigation = useNavigation(route);
   const [title, setTitle] = useState(''); 
   const [note, setNote] = useState(''); 
 
@@ -13,8 +15,11 @@ const NoteAdd = () => {
     const docRef = await addDoc(collection(db, 'notes'), {
       title: title,
       note: note,
-    });
-    Keyboard.dismiss();
+    }).then(() => {
+      navigation.navigate('Home')
+    }).catch(error => {
+      alert(error);
+    })
   }
 
   return (

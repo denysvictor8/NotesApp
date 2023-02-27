@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet } from 'react-native'
+import { View, Text, Button, StyleSheet, Pressable } from 'react-native'
 import React, {useState, useEffect} from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { FlashList } from '@shopify/flash-list'
@@ -16,10 +16,11 @@ const Home = () => {
     async function getNotes(db) {
       const q = query(collection(db, "notes"), orderBy('title', 'asc'));
       const querySnapshot = await getDocs(q);
+      const notasList = [];
       querySnapshot.forEach((doc) => {
-        const notasList = querySnapshot.docs.map(doc => doc.data());
-        setNotes(notasList);
+        notasList.push({...doc.data(), id: doc.id})
       });
+      setNotes(notasList);
     }
     getNotes(db);
   }, []);
@@ -34,12 +35,18 @@ const Home = () => {
         estimatedItemSize={100}
         renderItem={ ({item}) => (
           <View style={styles.noteView}>
-            <Text style={styles.noteTitle}>
-              {item.title}
-            </Text>
-            <Text style={styles.noteDescription}>
-              {item.note}
-            </Text>
+            <Pressable
+              onPress={ 
+                () => navigation.navigate('Detail', {item})
+              }
+            >
+              <Text style={styles.noteTitle}>
+                {item.title}
+              </Text>
+              <Text style={styles.noteDescription}>
+                {item.note}
+              </Text>
+            </Pressable>
           </View>
         )} 
       />
