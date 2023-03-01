@@ -1,8 +1,8 @@
-import { Text, View, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
+import { Text, View, StyleSheet, TextInput, TouchableOpacity, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 
 import db from '../config/config';
 
@@ -25,10 +25,41 @@ const Detail = ({route}) => {
         })
     }
     
+    async function deleteNote() {
+        const docRef = doc(db, "notes", noteId);
+        await deleteDoc(docRef, {
+          title: noteTitle,
+          note: noteText
+        }).then(() => {
+          navigation.navigate('Home')
+        }).catch(error => {
+          alert(error);
+        })
+    }
+    
     const handleUpdate = () => {
       if (noteTitle && noteText.length > 0) {
           updateNote();
         }
+    };
+    
+    const handleDelete = () => {
+      Alert.alert(
+        //title
+        'Remover',
+        //body
+        'Deseja remover?',
+        [
+          { text: 'Yes', onPress: () => deleteNote() },
+          {
+            text: 'No',
+            onPress: () => console.log('Nao deletado'),
+            style: 'cancel',
+          },
+        ],
+        { cancelable: false }
+        //clicking out side of alert will not cancel
+      );
     };
 
     return (
@@ -46,13 +77,25 @@ const Detail = ({route}) => {
           onChangeText = {(text) => setNote(text)}
           style = { styles.inputNote }
         />
-  
-        <TouchableOpacity 
-        style={ styles.button } 
-        onPress={handleUpdate} 
-        >
-          <Text style={ styles.buttonText }>Edit Note</Text>
-        </TouchableOpacity>
+
+        <View style={styles.buttonView}>
+
+          <TouchableOpacity 
+          style={ styles.button } 
+          onPress={handleDelete} 
+          >
+            <Text style={ styles.buttonDelete }>Delete Note</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+          style={ styles.button } 
+          onPress={handleUpdate} 
+          >
+            <Text style={ styles.buttonUpdate }>Edit Note</Text>
+          </TouchableOpacity>
+
+        </View>
+
   
       </View>
     )
@@ -89,20 +132,31 @@ const styles = StyleSheet.create({
       padding: 10
     },
     button: {
-      backgroundColor: '#c9f',
-      borderRadius: 10,
-      marginTop: 20,
-      height: 55,
+      backgroundColor: '#ccc',
+      borderRadius: 5,
+      marginTop: 10,
+      height: 50,
       width: 150,
       alignItems: 'center',
       justifyContent: 'center',
       elevation: 7,
       shadowColor: 'blue'
     },
-    buttonText: {
-      color: 'black',
+    buttonDelete: {
+      color: 'red',
       fontSize: 22,
       fontWeight: 'bold',
-    }
+    },
+    buttonUpdate: {
+      //backgroundColor: 'yellow',
+      color: '#228B22',
+      fontSize: 22,
+      fontWeight: 'bold',
+    },
+    buttonView: {
+      flexDirection: 'row',
+      justifyContent: 'space-around',
+      width: '97%',
+    },
   
   })
